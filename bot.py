@@ -17,7 +17,7 @@ bot = Bot(token=telegram_token)
 dp = Dispatcher(bot)
 
 # Мок данных
-data = {
+user_data = {
     'users': {},
     'speakers': {
         '1': {'name': 'Валентин'},
@@ -27,7 +27,7 @@ data = {
 
 
 def get_user_role(user_id):
-    return data['users'].get(str(user_id), {}).get('role')
+    return user_data['users'].get(str(user_id), {}).get('role')
 
 
 @dp.message_handler(commands=['start'])
@@ -58,7 +58,7 @@ async def on_setrole(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     user_role = callback_query.data.split(':')[1]
     # Сохраняем роль пользователя
-    data['users'][str(user_id)] = {'role': user_role}
+    user_data['users'][str(user_id)] = {'role': user_role}
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(user_id, f'Ваша роль установлена как {user_role}.')
 
@@ -66,7 +66,7 @@ async def on_setrole(callback_query: types.CallbackQuery):
 @dp.message_handler(commands=['ask'])
 async def on_ask(message: types.Message):
     keyboard = types.InlineKeyboardMarkup()
-    speakers = data['speakers']
+    speakers = user_data['speakers']
     for id, speaker in speakers.items():
         button = types.InlineKeyboardButton(speaker['name'], callback_data=f'ask:{id}')
         keyboard.add(button)
