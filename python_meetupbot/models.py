@@ -66,3 +66,19 @@ class Users(UUIDMixin, TimeStampedMixin):
     class Meta:
         verbose_name = 'User'
         verbose_name_plural = 'Users'
+
+
+class Speakers(UUIDMixin, TimeStampedMixin):
+    pass
+
+
+class Comments(UUIDMixin, TimeStampedMixin):
+    pass
+
+
+class Topics(UUIDMixin, TimeStampedMixin):
+    pass
+
+
+class Events(UUIDMixin, TimeStampedMixin):
+    pass
