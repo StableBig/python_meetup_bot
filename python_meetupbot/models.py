@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.utils import timezone
 
 
 class TimeStampedMixin(models.Model):
@@ -19,7 +20,7 @@ class UUIDMixin(models.Model):
 
 
 class Users(UUIDMixin, TimeStampedMixin):
-    telegram_id = models.IntegerField(unique=True)
+    telegram_id = models.IntegerField(unique=True, default=False)
     username = models.CharField(
         max_length=64,
         null=True,
@@ -69,16 +70,58 @@ class Users(UUIDMixin, TimeStampedMixin):
 
 
 class Speakers(UUIDMixin, TimeStampedMixin):
-    pass
+    speaker_id = models.IntegerField(verbose_name='Telegram id', null=True, blank=True, default=False)
+    fio = models.CharField(max_length=100, verbose_name='FIO Speaker', null=True, blank=True)
+    email = models.CharField(max_length=100, verbose_name='Email speaker', null=True, blank=True)
 
+    class Meta:
+        verbose_name = 'Speaker'
+        verbose_name_plural = 'Speakers'
 
-class Comments(UUIDMixin, TimeStampedMixin):
-    pass
-
-
-class Topics(UUIDMixin, TimeStampedMixin):
-    pass
+    def __str__(self):
+        return f'{self.fio} - {self.email}'
 
 
 class Events(UUIDMixin, TimeStampedMixin):
-    pass
+    date = models.DateField(verbose_name='Date of the event', default=timezone.now,)
+    start = models.TimeField(verbose_name='Time start event', null=True, blank=True)
+    end = models.TimeField(verbose_name='Time end event', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Event'
+        verbose_name_plural = 'Events'
+
+    def __str__(self):
+        return f'Event {self.date}'
+
+
+class Topics(UUIDMixin, TimeStampedMixin):
+    event = models.ForeignKey(Events, on_delete=models.DO_NOTHING, verbose_name='Event', null=True)
+    speaker = models.ForeignKey(Speakers, on_delete=models.DO_NOTHING, verbose_name='Speaker', null=True)
+    title = models.CharField(max_length=300, verbose_name='Topic', null=True)
+    start = models.TimeField(verbose_name='Topic start time', null=True,
+        blank=True)
+    end = models.TimeField(verbose_name='Topic end time', null=True,
+        blank=True)
+
+    class Meta:
+        verbose_name = 'Topic'
+        verbose_name_plural = 'Topics'
+
+    def __str__(self):
+        return f'{self.title} - {self.speaker.name}'
+
+
+class Comments(UUIDMixin, TimeStampedMixin):
+    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='td_id', null=True, blank=True, default=False)
+    date = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='date_event', default=False)
+    speaker_id = models.ForeignKey(Speakers, on_delete=models.DO_NOTHING, related_name='speaker', null=True)
+    comment = models.CharField(max_length=200, verbose_name='Comment to the speaker', null=True,
+        blank=True)
+
+    class Meta:
+        verbose_name = 'Comment'
+        verbose_name_plural = 'Comments'
+
+    def __str__(self):
+        return f'{self.telegram_id} - {self.comment}'
