@@ -14,19 +14,41 @@ class UsersAdmin(admin.ModelAdmin):
 
 @admin.register(Comments)
 class CommentsAdmin(admin.ModelAdmin):
-    pass
+    list_display = [
+        'date', 'telegram_id', 'speaker_id', 'comment'
+    ]
+
+    search_fields = ['date', 'telegram_id', 'speaker_id']
 
 
 @admin.register(Topics)
 class TopicsAdmin(admin.ModelAdmin):
-    pass
+    list_display = [
+        'event', 'speaker', 'title', 'start', 'end'
+    ]
+
+    search_fields = [
+        'event', 'speaker', 'title'
+    ]
 
 
 @admin.register(Events)
 class EventsAdmin(admin.ModelAdmin):
-    pass
+    list_display = [
+        'date', 'start', 'end'
+    ]
+
+    search_fields = [
+        'date'
+    ]
 
 
 @admin.register(Speakers)
 class SpeakersAdmin(admin.ModelAdmin):
-    pass
+    list_display = [
+        'speaker_id', 'fio', 'email'
+    ]
+
+    search_fields = [
+        'fio', 'email'
+    ]
