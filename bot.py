@@ -1,13 +1,10 @@
 import os
-import json
 import logging
-from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
+from aiogram.dispatcher.filters import Command, Text
 
-
-load_dotenv()
-
-telegram_token = os.getenv('TELEGRAM_API_TOKEN')
+telegram_token = os.environ.get('TELEGRAM_API_TOKEN')
+admin_password = os.environ.get('ADMIN_PASSWORD')
 
 # Включаем логгирование
 logging.basicConfig(level=logging.INFO)
@@ -22,7 +19,8 @@ user_data = {
     'speakers': {
         '1': {'name': 'Валентин'},
         '2': {'name': 'Макс'}
-    }
+    },
+    'questions': []  # Список вопросов гостей
 }
 
 
@@ -37,16 +35,11 @@ async def on_start(message: types.Message):
 
     if user_role:
         # Повторно отправляем приветствие в зависимости от роли
-        greeting_by_role = {
-            'гость': 'Привет, гость! Ты можешь просматривать информацию о событиях и задавать вопросы.',
-            'выступающий': 'Привет, выступающий! Ты можешь ответить на вопросы гостей.',
-            'организатор': 'Привет, организатор! Ты можешь публиковать информацию о своих докладах и отвечать на вопросы.'
-        }
-        await message.reply(greeting_by_role.get(user_role, 'Привет!'))
+        await message.reply(f'Привет! Вы {user_role}.')
     else:
         # Предлагаем пользователю установить роль
         keyboard = types.InlineKeyboardMarkup()
-        roles = [('Гость', 'гость'), ('Выступающий', 'выступающий'), ('Организатор', 'организатор')]
+        roles = [('Гость', 'гость'), ('Докладчик', 'докладчик'), ('Организатор', 'организатор')]
         for name, role in roles:
             button = types.InlineKeyboardButton(name, callback_data=f'setrole:{role}')
             keyboard.add(button)
@@ -60,24 +53,72 @@ async def on_setrole(callback_query: types.CallbackQuery):
     # Сохраняем роль пользователя
     user_data['users'][str(user_id)] = {'role': user_role}
     await bot.answer_callback_query(callback_query.id)
-    await bot.send_message(user_id, f'Ваша роль установлена как {user_role}.')
+
+    # Запрашиваем пароль, если это организатор или докладчик
+    if user_role == 'организатор' or user_role == 'докладчик':
+        await bot.send_message(user_id, 'Пожалуйста, введите пароль:')
+    elif user_role == 'гость':
+        keyboard = types.InlineKeyboardMarkup()
+        keyboard.add(types.InlineKeyboardButton("Задать вопрос", callback_data='ask'))
+        await bot.send_message(user_id,
+                               f'Ваша роль установлена как {user_role}. Вы можете задать вопрос докладчику.',
+                               reply_markup=keyboard)
+    else:
+        await bot.send_message(user_id, 'Вы не авторизованы.')
 
 
-@dp.message_handler(commands=['ask'])
-async def on_ask(message: types.Message):
-    keyboard = types.InlineKeyboardMarkup()
-    speakers = user_data['speakers']
-    for id, speaker in speakers.items():
-        button = types.InlineKeyboardButton(speaker['name'], callback_data=f'ask:{id}')
-        keyboard.add(button)
-    await message.reply('Выбери выступающего, чтобы задать вопрос:', reply_markup=keyboard)
+@dp.message_handler(lambda message: get_user_role(message.from_user.id) in ['организатор', 'докладчик'])
+async def on_password_entry(message: types.Message):
+    user_id = message.from_user.id
+    user_role = get_user_role(user_id)
+    password = message.text
+
+    if user_role == 'организатор' and password == admin_password:
+        await message.reply('Доступ разрешен. Вы можете начать публиковать информацию о своих встречах.')
+    elif user_role == 'докладчик' and password == admin_password:
+        await message.reply('Доступ разрешен. Вы можете начать отвечать на вопросы гостей.')
+    else:
+        await message.reply('Неверный пароль. Попробуйте еще раз.')
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('ask:'))
-async def on_question(callback_query: types.CallbackQuery):
-    speaker_id = callback_query.data.split(':')[1]
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('ask'))
+async def on_ask(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
     await bot.answer_callback_query(callback_query.id)
-    await bot.send_message(callback_query.from_user.id, f'Вы можете задать вопрос выступающему с ID {speaker_id}')
+    await bot.send_message(user_id, 'Введите ваш вопрос:')
+    # Устанавливаем состояние, чтобы ожидать ввода вопроса от гостя
+    await dp.current_state().set_state('waiting_for_question')
+
+
+@dp.message_handler(state='waiting_for_question', content_types=types.ContentTypes.TEXT)
+async def on_guest_question_entry(message: types.Message):
+    user_id = message.from_user.id
+    question_text = message.text
+    user_data['questions'].append({'user_id': user_id, 'question': question_text})
+    await message.reply('Ваш вопрос отправлен!')
+    # Сбрасываем состояние после получения вопроса от гостя
+    await dp.current_state().reset_state()
+
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('setrole:'))
+async def on_setrole(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    user_role = callback_query.data.split(':')[1]
+    # Сохраняем роль пользователя
+    user_data['users'][str(user_id)] = {'role': user_role}
+    await bot.answer_callback_query(callback_query.id)
+
+    # Запрашиваем пароль, если это организатор или докладчик
+    if user_role == 'организатор' or user_role == 'докладчик':
+        await bot.send_message(user_id, 'Пожалуйста, введите пароль:')
+    elif user_role == 'гость':
+        keyboard = types.InlineKeyboardMarkup()
+        keyboard.add(types.InlineKeyboardButton('Задать вопрос', callback_data='ask'))
+        await bot.send_message(user_id,
+                               f'Ваша роль установлена как {user_role}. Вы можете задать вопрос докладчику.',
+                               reply_markup=keyboard)
+    else:
+        await bot.send_message(user_id, 'Вы не авторизованы.')
 
 
 if __name__ == '__main__':
