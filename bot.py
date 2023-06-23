@@ -14,6 +14,7 @@ from django.conf import settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'python_meetup.settings')
 django.setup()
 
+from django.contrib.auth.models import User, Group
 from python_meetupbot.models import Events, Users, Speakers, Comments, Topics
 
 telegram_token = settings.TELEGRAM_TOKEN
@@ -186,12 +187,12 @@ async def send_action_buttons(message: types.Message, role: str):
         buttons = [
             ('Задать вопрос', 'ask_question'),
             ('Расписание мероприятий', 'schedule')
-            # Добавить другие книпки для гостей...
+            # Добавить другие кнопки для гостей...
         ]
     elif role == 'докладчик':
         buttons = [
             ('Посмотреть вопросы', 'view_questions'),
-            # Добавить другие книпки для докладчиков...
+            # Добавить другие кнопки для докладчиков...
         ]
     elif role == 'организатор':
         buttons = [
