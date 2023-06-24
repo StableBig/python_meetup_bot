@@ -46,7 +46,7 @@ class EventsAdmin(admin.ModelAdmin):
 @admin.register(Speakers)
 class SpeakersAdmin(admin.ModelAdmin):
     list_display = [
-        'speaker_id', 'fio', 'email'
+        'telegram_id', 'fio', 'email'
     ]
 
     search_fields = [
