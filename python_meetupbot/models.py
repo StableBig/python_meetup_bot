@@ -116,12 +116,38 @@ class Comments(UUIDMixin, TimeStampedMixin):
     telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='td_id', null=True, blank=True, default=False)
     date = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='date_event', default=False)
     speaker_id = models.ForeignKey(Speakers, on_delete=models.DO_NOTHING, related_name='speaker', null=True)
-    comment = models.CharField(max_length=200, verbose_name='Comment to the speaker', null=True,
-        blank=True)
+    comment = models.CharField(max_length=200, verbose_name='Comment to the speaker', null=True,blank=True)
 
     class Meta:
         verbose_name = 'Comment'
         verbose_name_plural = 'Comments'
+
+    def __str__(self):
+        return f'{self.telegram_id} - {self.comment}'
+
+
+class Questions(UUIDMixin, TimeStampedMixin):
+    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='questions_td_id', null=True, blank=True, default=False)
+    date = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='questions_date_event', default=False)
+    speaker_id = models.ForeignKey(Speakers, on_delete=models.DO_NOTHING, related_name='questions_speaker', null=True)
+    comment = models.CharField(max_length=200, verbose_name='Question to the speaker', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Question'
+        verbose_name_plural = 'Questions'
+
+    def __str__(self):
+        return f'{self.telegram_id} - {self.comment}'
+
+
+class Event_comments(UUIDMixin, TimeStampedMixin):
+    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='Event_comments_td_id', null=True, blank=True, default=False)
+    date = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='Event_comments_date', default=False)
+    comment = models.CharField(max_length=200, verbose_name='Comment about meetup', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Meetup Comment'
+        verbose_name_plural = 'Meetup Comments'
 
     def __str__(self):
         return f'{self.telegram_id} - {self.comment}'
