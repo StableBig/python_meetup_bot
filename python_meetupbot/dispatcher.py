@@ -16,7 +16,7 @@ meetup_handlers = ConversationHandler(
         MessageHandler(Filters.regex('^(Гость)$'),
                        meetup_handlers.test),
         MessageHandler(Filters.regex('^(Докладчик)$'),
-                       meetup_handlers.test),
+                       meetup_handlers.get_speaker_commands),
         MessageHandler(Filters.regex('^(Организатор)$'),
                        admin_handlers.command_admin),
         MessageHandler(Filters.regex('^(Выход)$'),
