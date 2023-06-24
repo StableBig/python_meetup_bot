@@ -10,4 +10,4 @@ start_not_created = '''С возвращением, {first_name}!
 cancel_text = 'Вы перемещены в главное меню'
 
 # Button text
-start_button_text = ['Список тем', 'Список мероприятий', 'Выход']
+start_button_text = ['Гость', 'Докладчик', 'Организатор']
