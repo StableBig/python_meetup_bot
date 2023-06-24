@@ -15,12 +15,12 @@ def build_menu(buttons, n_cols,
     return menu
 
 
-def make_keyboard_with_admin_features() -> InlineKeyboardMarkup:
+def make_speaker_keyboard() -> InlineKeyboardMarkup:
     buttons = [
         [InlineKeyboardButton(speaker_choose[0],
-                              callback_data=1)],
+                              callback_data='questions')],
         [InlineKeyboardButton(speaker_choose[1],
-                              callback_data=1)]
+                              callback_data='comments')]
     ]
     reply_markup = InlineKeyboardMarkup(buttons)
     return reply_markup
