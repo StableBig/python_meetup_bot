@@ -5,7 +5,7 @@ from telegram.ext import (
     ConversationHandler, CallbackContext
 )
 
-from selfstoragebot.handlers.common import static_text
+from python_meetupbot.handlers.common import static_text
 from python_meetupbot.models import Users
 from .keyboard_utils import make_keyboard_for_start_command
 
@@ -23,16 +23,6 @@ def command_start(update: Update, context):
         telegram_id=user_info['id'],
         username=user_info['username'],
     )
-
-    args = context.args
-    if args:
-        link_id = args[0]
-        try:
-            invitation_link = InvitationLink.objects.get(link_id=link_id)
-            invitation_link.click_count += 1
-            invitation_link.save()
-        except InvitationLink.DoesNotExist:
-            pass
 
     if created:
         text = static_text.start_created.format(

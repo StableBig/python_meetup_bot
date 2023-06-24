@@ -11,6 +11,25 @@ from python_meetupbot.handlers.common import handlers as common_handlers
 from python_meetupbot.handlers.meetup import handlers as meetup_handlers
 from python_meetupbot.handlers.admin import handlers as admin_handlers
 
+meetup_handlers = ConversationHandler(
+    entry_points=[
+        MessageHandler(Filters.regex('^(Гость)$'),
+                       meetup_handlers.test),
+        MessageHandler(Filters.regex('^(Докладчик)$'),
+                       meetup_handlers.test),
+        MessageHandler(Filters.regex('^(Организатор)$'),
+                       admin_handlers.command_admin),
+        MessageHandler(Filters.regex('^(Выход)$'),
+                       meetup_handlers.exit),
+    ],
+    states={
+
+    },
+    fallbacks=[
+        CommandHandler("cancel", common_handlers.command_cancel)
+    ]
+    #
+)
 
 def setup_dispatcher(dp):
     dp.add_handler(meetup_handlers)
