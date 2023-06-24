@@ -70,7 +70,7 @@ class Users(UUIDMixin, TimeStampedMixin):
 
 
 class Speakers(UUIDMixin, TimeStampedMixin):
-    speaker_id = models.IntegerField(verbose_name='Telegram id', null=True, blank=True, default=False)
+    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='tg_id', null=True, blank=True, default=False)
     fio = models.CharField(max_length=100, verbose_name='FIO Speaker', null=True, blank=True)
     email = models.CharField(max_length=100, verbose_name='Email speaker', null=True, blank=True)
 
