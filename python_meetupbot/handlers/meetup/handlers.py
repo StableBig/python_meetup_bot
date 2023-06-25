@@ -1,18 +1,21 @@
-from python_meetupbot.models import Users, Events
 from .keyboard_utils import make_choose_keyboard, make_speaker_keyboard, make_guest_keyboard
-import uuid
 from telegram import ParseMode, Update, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, ConversationHandler, MessageHandler, Filters
 from python_meetupbot.models import Users, Speakers, Topics, Questions, Comments, Events, Eventcomments
 from python_meetupbot.handlers.meetup import static_text
 from datetime import datetime
 
+FEEDBACK_EVENT_COMMENTS, FEEDBACK_COMMENTS, FEEDBACK_QUESTIONS, GUEST_OPTIONS, ASK_QUESTION, LEAVE_FEEDBACK_TALK, \
+    LEAVE_FEEDBACK_EVENT, CREATE_MEETUP, OPTION, MEETUP_END_TIME, MEETUP_DATE, MEETUP_START_TIME = range(12)
 
-GUEST_OPTIONS, ASK_QUESTION, LEAVE_FEEDBACK_TALK, LEAVE_FEEDBACK_EVENT, CREATE_MEETUP, OPTION, MEETUP_END_TIME, MEETUP_DATE, MEETUP_START_TIME = range(9)
 
-
-def test(update: Update, _):
-    pass
+def exit(update, _):
+    first_name = update.message.from_user.first_name
+    text = static_text.bye_bye.format(
+        first_name=first_name
+    )
+    update.message.reply_text(text=text)
+    return ConversationHandler.END
 
 
 def guest_options(update: Update, _: CallbackContext):
@@ -157,11 +160,13 @@ def meetup_end_time(update: Update, meetup_description):
     update.message.reply_text(
         text=text
     )
+    return ConversationHandler.END
 
 
 def choose_admin_button(update: Update, _):
     print('choose_admin_button')
     answer = update.message.text
+    print('answer', answer)
     if static_text.features_choose.index(answer) == 0:
         text = static_text.meetup_name
         update.message.reply_text(
@@ -170,8 +175,36 @@ def choose_admin_button(update: Update, _):
         return CREATE_MEETUP
     elif static_text.features_choose.index(answer) == 1:
         pass
-    else:
-        pass
+    elif static_text.features_choose.index(answer) == 2:
+        list_event = Events.objects.all().order_by('date')
+        text = static_text.choose_meetup
+        update.message.reply_text(
+            text=text
+        )
+        for event in list_event:
+            text = static_text.list_meetup.format(
+                name=event.name,
+                date=event.date,
+                start_time=event.start,
+                end_time=event.end
+            )
+            update.message.reply_text(text=text)
+        return FEEDBACK_EVENT_COMMENTS
+    elif static_text.features_choose.index(answer) == 3:
+        list_topic = Topics.objects.all()
+        text = static_text.choose_topic
+        update.message.reply_text(
+            text=text
+        )
+        for topic in list_topic:
+            user = Speakers.objects.get(id=topic.speaker_id)
+            text = static_text.list_topic.format(
+                title=topic.title,
+                speaker=user.fio,
+                id=topic.id
+            )
+            update.message.reply_text(text=text)
+        return FEEDBACK_COMMENTS
 
 
 def organization_option(update: Update, _):
@@ -185,3 +218,21 @@ def organization_option(update: Update, _):
     update.message.reply_text(text=text,
                               reply_markup=make_choose_keyboard())
     return OPTION
+
+
+def get_feedback_event_comments(update: Update, _):
+    print('get_feedback_comments')
+    event_id = Events.objects.get(name=update.message.text).id
+    feedbacks = Eventcomments.objects.filter(name_id=event_id)
+    for feedback in feedbacks:
+        print(feedback)
+        update.message.reply_text(text=str(feedback))
+
+
+def get_feedback_comments(update: Update, _):
+    print('get_feedback_questions')
+    print(update.message.text)
+    feedbacks = Comments.objects.filter(topic_id=update.message.text)
+    for feedback in feedbacks:
+        print(feedback)
+        update.message.reply_text(text=str(feedback))

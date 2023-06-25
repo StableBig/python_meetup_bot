@@ -43,10 +43,19 @@ meetup_handlers = ConversationHandler(
         meetup_handlers.MEETUP_END_TIME: [
             MessageHandler(Filters.text & ~Filters.command, meetup_handlers.meetup_end_time)
         ],
-            meetup_handlers.GUEST_OPTIONS: [MessageHandler(Filters.text & ~Filters.command, meetup_handlers.handle_guest_option)],
-            meetup_handlers.ASK_QUESTION: [MessageHandler(Filters.text & ~Filters.command, meetup_handlers.ask_question)],
-            meetup_handlers.LEAVE_FEEDBACK_TALK: [MessageHandler(Filters.text & ~Filters.command, meetup_handlers.leave_feedback_talk)],
-            meetup_handlers.LEAVE_FEEDBACK_EVENT: [MessageHandler(Filters.text & ~Filters.command, meetup_handlers.leave_feedback_event)],
+        meetup_handlers.FEEDBACK_EVENT_COMMENTS: [
+            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.get_feedback_event_comments)
+        ],
+        meetup_handlers.FEEDBACK_COMMENTS: [
+            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.get_feedback_comments)
+        ],
+        meetup_handlers.GUEST_OPTIONS: [
+            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.handle_guest_option)],
+        meetup_handlers.ASK_QUESTION: [MessageHandler(Filters.text & ~Filters.command, meetup_handlers.ask_question)],
+        meetup_handlers.LEAVE_FEEDBACK_TALK: [
+            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.leave_feedback_talk)],
+        meetup_handlers.LEAVE_FEEDBACK_EVENT: [
+            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.leave_feedback_event)],
     },
     fallbacks=[
         CommandHandler("cancel", common_handlers.command_cancel)
