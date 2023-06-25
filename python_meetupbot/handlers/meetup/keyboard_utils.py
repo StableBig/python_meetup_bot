@@ -1,7 +1,7 @@
 import telegram
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
 
-from .static_text import speaker_choose
+from .static_text import speaker_choose, guest_options_buttons
 
 
 def build_menu(buttons, n_cols,
@@ -23,4 +23,15 @@ def make_speaker_keyboard() -> InlineKeyboardMarkup:
                               callback_data='comments')]
     ]
     reply_markup = InlineKeyboardMarkup(buttons)
+    return reply_markup
+
+def make_guest_keyboard() -> ReplyKeyboardMarkup:
+    print('make_guest_keyboard')
+    buttons = [KeyboardButton(button) for button in guest_options_buttons]
+
+    reply_markup = ReplyKeyboardMarkup(
+        build_menu(buttons, n_cols=1),
+        resize_keyboard=True,
+        one_time_keyboard=True
+    )
     return reply_markup
