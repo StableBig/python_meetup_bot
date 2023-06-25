@@ -1,4 +1,4 @@
-from .keyboard_utils import make_choose_keyboard, make_speaker_keyboard, make_guest_keyboard
+from .keyboard_utils import make_choose_keyboard, make_speaker_keyboard, make_guest_keyboard, make_topic_keyboard
 from telegram import ParseMode, Update, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, ConversationHandler, MessageHandler, Filters
 from python_meetupbot.models import Users, Speakers, Topics, Questions, Comments, Events, Eventcomments
@@ -6,7 +6,8 @@ from python_meetupbot.handlers.meetup import static_text
 from datetime import datetime
 
 FEEDBACK_EVENT_COMMENTS, FEEDBACK_COMMENTS, FEEDBACK_QUESTIONS, GUEST_OPTIONS, ASK_QUESTION, LEAVE_FEEDBACK_TALK, \
-    LEAVE_FEEDBACK_EVENT, CREATE_MEETUP, OPTION, MEETUP_END_TIME, MEETUP_DATE, MEETUP_START_TIME = range(12)
+    LEAVE_FEEDBACK_EVENT, CREATE_MEETUP, OPTION, MEETUP_END_TIME, MEETUP_DATE, MEETUP_START_TIME, SPEAKER_OPTIONS \
+    = range(13)
 
 
 def exit(update, _):
@@ -97,14 +98,70 @@ def show_events_schedule(update: Update, _):
     return ConversationHandler.END
 
 
-def get_speaker_commands(update: Update, _):
+def get_speaker_commands(update: Update, _: CallbackContext):
     speaker = Users.objects.get(telegram_id=update.message.from_user.id)
-    if Speakers.objects.filter(telegram_id=speaker) is None:
+    try:
+        Speakers.objects.get(telegram_id=speaker)
+        update.message.reply_text(text=static_text.speaker_text)
+        update.message.reply_text(static_text.choose_option, reply_markup=make_speaker_keyboard())
+        return SPEAKER_OPTIONS
+
+    except Speakers.DoesNotExist:
         update.message.reply_text(static_text.only_for_speakers)
         return ConversationHandler.END
-    text = static_text.speaker_text
-    update.message.reply_text(text=text,
-                              reply_markup=make_speaker_keyboard())
+
+
+def get_speaker_choice(update: Update, _: CallbackContext):
+    print('get_speaker_choice')
+    speaker_option = update.message.text
+    speaker = Users.objects.get(telegram_id=update.message.from_user.id)
+    topics = Topics.objects.all()
+    speaker_topics = [topic.title for topic in topics if topic.speaker.telegram_id == speaker]
+    if speaker_option == static_text.speaker_choose[0]:
+        get_questions(update, _, speaker)
+    elif speaker_option == static_text.speaker_choose[1]:
+        get_topic(update, _, speaker_topics)
+    elif speaker_option in speaker_topics:
+        get_topic_comments(update, _, speaker_option)
+    elif speaker_option == static_text.back:
+        return get_speaker_commands(update, _)
+
+
+def get_questions(update: Update, _, speaker):
+    questions = Questions.objects.all()
+    speaker_questions = [question for question in questions if question.speaker_id.telegram_id == speaker]
+    if not speaker_questions:
+        update.message.reply_text(static_text.no_questions)
+        return ConversationHandler.END
+
+    response = static_text.speaker_questions
+    for question in speaker_questions:
+        response += f"{question.telegram_id}: {question.question}\n"
+        response += "\n"
+
+    update.message.reply_text(response)
+    return ConversationHandler.END
+
+
+def get_topic(update: Update, _: CallbackContext, speaker_topics):
+    update.message.reply_text(text=static_text.topics)
+    update.message.reply_text(static_text.choose_option, reply_markup=make_topic_keyboard(speaker_topics))
+
+
+def get_topic_comments(update: Update, _, topic_name):
+    comments = Comments.objects.all()
+    topic_comments = [comment for comment in comments if comment.topic.title == topic_name]
+    if not topic_comments:
+        update.message.reply_text(static_text.topic_no_comments.format(topic_name))
+        return ConversationHandler.END
+
+    response = static_text.topic_comments.format(topic_name)
+    for comment in topic_comments:
+        response += f"{comment.telegram_id}: {comment.comment}\n"
+        response += "\n"
+
+    update.message.reply_text(response)
+    return ConversationHandler.END
 
 
 def exit(update, _):

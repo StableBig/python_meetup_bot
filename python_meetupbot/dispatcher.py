@@ -56,6 +56,8 @@ meetup_handlers = ConversationHandler(
             MessageHandler(Filters.text & ~Filters.command, meetup_handlers.leave_feedback_talk)],
         meetup_handlers.LEAVE_FEEDBACK_EVENT: [
             MessageHandler(Filters.text & ~Filters.command, meetup_handlers.leave_feedback_event)],
+        meetup_handlers.SPEAKER_OPTIONS: [
+            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.get_speaker_choice)]
     },
     fallbacks=[
         CommandHandler("cancel", common_handlers.command_cancel)
