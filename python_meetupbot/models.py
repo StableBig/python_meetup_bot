@@ -70,7 +70,8 @@ class Users(UUIDMixin, TimeStampedMixin):
 
 
 class Speakers(UUIDMixin, TimeStampedMixin):
-    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='tg_id', null=True, blank=True, default=False)
+    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='tg_id', null=True, blank=True,
+                                    default=False)
     fio = models.CharField(max_length=100, verbose_name='FIO Speaker', null=True, blank=True)
     email = models.CharField(max_length=100, verbose_name='Email speaker', null=True, blank=True)
 
@@ -83,7 +84,8 @@ class Speakers(UUIDMixin, TimeStampedMixin):
 
 
 class Events(UUIDMixin, TimeStampedMixin):
-    date = models.DateField(verbose_name='Date of the event', default=timezone.now,)
+    name = models.CharField(max_length=100, verbose_name='event name', null=True, blank=True)
+    date = models.DateField(verbose_name='Date of the event', default=timezone.now, )
     start = models.TimeField(verbose_name='Time start event', null=True, blank=True)
     end = models.TimeField(verbose_name='Time end event', null=True, blank=True)
 
@@ -92,7 +94,7 @@ class Events(UUIDMixin, TimeStampedMixin):
         verbose_name_plural = 'Events'
 
     def __str__(self):
-        return f'Event {self.date}'
+        return f'Event {self.name}-{self.date}'
 
 
 class Topics(UUIDMixin, TimeStampedMixin):
@@ -100,23 +102,26 @@ class Topics(UUIDMixin, TimeStampedMixin):
     speaker = models.ForeignKey(Speakers, on_delete=models.DO_NOTHING, verbose_name='Speaker', null=True)
     title = models.CharField(max_length=300, verbose_name='Topic', null=True)
     start = models.TimeField(verbose_name='Topic start time', null=True,
-        blank=True)
+                             blank=True)
     end = models.TimeField(verbose_name='Topic end time', null=True,
-        blank=True)
+                           blank=True)
 
     class Meta:
         verbose_name = 'Topic'
         verbose_name_plural = 'Topics'
 
     def __str__(self):
-        return f'{self.title} - {self.speaker.telegram_id}'
+        return f'{self.title} - {self.speaker.fio}'
+
 
 
 class Comments(UUIDMixin, TimeStampedMixin):
-    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='td_id', null=True, blank=True, default=False)
+    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='td_id', null=True, blank=True,
+                                    default=False)
     date = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='date_event', default=False)
     speaker_id = models.ForeignKey(Speakers, on_delete=models.DO_NOTHING, related_name='speaker', null=True)
-    comment = models.CharField(max_length=200, verbose_name='Comment to the speaker', null=True, blank=True)
+    comment = models.CharField(max_length=200, verbose_name='Comment to the speaker', null=True,
+                               blank=True)
 
     class Meta:
         verbose_name = 'Comment'

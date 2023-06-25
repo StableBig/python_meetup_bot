@@ -13,7 +13,8 @@ from python_meetupbot.handlers.meetup.handlers import (guest_options, handle_gue
                                                        LEAVE_FEEDBACK_EVENT)
 from python_meetupbot.handlers.common import handlers as common_handlers
 from python_meetupbot.handlers.meetup import handlers as meetup_handlers
-from python_meetupbot.handlers.admin import handlers as admin_handlers
+from python_meetupbot.handlers.meetup.static_text import features_choose
+from python_meetupbot.handlers.admin.static_text import features_choose
 
 meetup_handlers = ConversationHandler(
     entry_points=[
@@ -22,28 +23,43 @@ meetup_handlers = ConversationHandler(
         MessageHandler(Filters.regex('^(Докладчик)$'),
                        meetup_handlers.get_speaker_commands),
         MessageHandler(Filters.regex('^(Организатор)$'),
-                       admin_handlers.command_admin),
+                       meetup_handlers.organization_option),
         MessageHandler(Filters.regex('^(Выход)$'),
                        meetup_handlers.exit),
     ],
     states={
-            GUEST_OPTIONS: [MessageHandler(Filters.text & ~Filters.command, handle_guest_option)],
-            ASK_QUESTION: [MessageHandler(Filters.text & ~Filters.command, ask_question)],
-            LEAVE_FEEDBACK_TALK: [MessageHandler(Filters.text & ~Filters.command, leave_feedback_talk)],
-            LEAVE_FEEDBACK_EVENT: [MessageHandler(Filters.text & ~Filters.command, leave_feedback_event)],
+        meetup_handlers.OPTION: [
+            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.choose_admin_button)
+        ],
+        meetup_handlers.CREATE_MEETUP: [
+            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.create_meetup)
+        ],
+        meetup_handlers.MEETUP_DATE: [
+            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.meetup_date)
+        ],
+        meetup_handlers.MEETUP_START_TIME: [
+            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.meetup_start_time)
+        ],
+        meetup_handlers.MEETUP_END_TIME: [
+            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.meetup_end_time)
+        ],
+            meetup_handlers.GUEST_OPTIONS: [MessageHandler(Filters.text & ~Filters.command, meetup_handlers.handle_guest_option)],
+            meetup_handlers.ASK_QUESTION: [MessageHandler(Filters.text & ~Filters.command, meetup_handlers.ask_question)],
+            meetup_handlers.LEAVE_FEEDBACK_TALK: [MessageHandler(Filters.text & ~Filters.command, meetup_handlers.leave_feedback_talk)],
+            meetup_handlers.LEAVE_FEEDBACK_EVENT: [MessageHandler(Filters.text & ~Filters.command, meetup_handlers.leave_feedback_event)],
     },
     fallbacks=[
         CommandHandler("cancel", common_handlers.command_cancel)
     ]
-    #
 )
+
 
 def setup_dispatcher(dp):
     dp.add_handler(meetup_handlers)
 
     dp.add_handler(CommandHandler("start", common_handlers.command_start))
     dp.add_handler(CommandHandler("cancel", common_handlers.command_cancel))
-    # dp.add_handler(CommandHandler("admin", admin_handlers.command_admin))
+
     return dp
 
 
