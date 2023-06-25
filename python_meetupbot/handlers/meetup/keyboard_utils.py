@@ -1,10 +1,10 @@
-import telegram
 from telegram import (
     KeyboardButton,
     ReplyKeyboardMarkup,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
 )
+
 from .static_text import (
     features_choose
 )
@@ -33,7 +33,7 @@ def make_choose_keyboard() -> ReplyKeyboardMarkup:
     )
     return reply_markup
 
-      
+
 def make_speaker_keyboard() -> InlineKeyboardMarkup:
     buttons = [
         [InlineKeyboardButton(speaker_choose[0],
@@ -44,7 +44,7 @@ def make_speaker_keyboard() -> InlineKeyboardMarkup:
     reply_markup = InlineKeyboardMarkup(buttons)
     return reply_markup
 
-      
+
 def make_guest_keyboard() -> ReplyKeyboardMarkup:
     print('make_guest_keyboard')
     buttons = [KeyboardButton(button) for button in guest_options_buttons]

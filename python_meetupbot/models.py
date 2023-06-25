@@ -114,12 +114,12 @@ class Topics(UUIDMixin, TimeStampedMixin):
         return f'{self.title} - {self.speaker.fio}'
 
 
-
 class Comments(UUIDMixin, TimeStampedMixin):
     telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='td_id', null=True, blank=True,
                                     default=False)
     date = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='date_event', default=False)
-    speaker_id = models.ForeignKey(Speakers, on_delete=models.DO_NOTHING, related_name='speaker', null=True)
+    speaker = models.ForeignKey(Speakers, on_delete=models.DO_NOTHING, related_name='speaker', null=True)
+    topic = models.ForeignKey(Topics, on_delete=models.DO_NOTHING, related_name='topic', null=True)
     comment = models.CharField(max_length=200, verbose_name='Comment to the speaker', null=True,
                                blank=True)
 
@@ -132,8 +132,9 @@ class Comments(UUIDMixin, TimeStampedMixin):
 
 
 class Questions(UUIDMixin, TimeStampedMixin):
-    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='questions_td_id', null=True, blank=True, default=False)
-    date = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='questions_date_event', default=False)
+    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='questions_td_id', null=True,
+                                    blank=True, default=False)
+    name = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='Eventname', default=False)
     speaker_id = models.ForeignKey(Speakers, on_delete=models.DO_NOTHING, related_name='questions_speaker', null=True)
     question = models.CharField(max_length=200, verbose_name='Question to the speaker', null=True, blank=True)
 
@@ -146,8 +147,9 @@ class Questions(UUIDMixin, TimeStampedMixin):
 
 
 class Eventcomments(UUIDMixin, TimeStampedMixin):
-    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='Event_comments_td_id', null=True, blank=True, default=False)
-    date = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='Event_comments_date', default=False)
+    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='Event_comments_td_id', null=True,
+                                    blank=True, default=False)
+    name = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='Event_name', default=False)
     meetup_comment = models.CharField(max_length=200, verbose_name='Comment about meetup', null=True, blank=True)
 
     class Meta:

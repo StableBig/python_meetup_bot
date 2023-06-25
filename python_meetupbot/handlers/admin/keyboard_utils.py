@@ -20,7 +20,12 @@ def make_keyboard_with_admin_features() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(features_choose[0],
                               url=admin_url)],
         [InlineKeyboardButton(features_choose[1],
-                              callback_data=1)]
+                              callback_data=1)],
+        [InlineKeyboardButton(features_choose[2],
+                              callback_data=2)],
+        [InlineKeyboardButton(features_choose[3],
+                              callback_data=3)]
     ]
     reply_markup = InlineKeyboardMarkup(buttons)
+
     return reply_markup
