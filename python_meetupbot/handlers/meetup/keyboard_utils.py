@@ -1,15 +1,6 @@
-from telegram import (
-    KeyboardButton,
-    ReplyKeyboardMarkup,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-)
-
-from .static_text import (
-    features_choose
-)
-from .static_text import speaker_choose, guest_options_buttons
-
+from telegram import KeyboardButton, ReplyKeyboardMarkup
+from .static_text import speaker_choose, guest_options_buttons, features_choose, back
+from python_meetupbot.models import Topics
 
 def build_menu(buttons, n_cols,
                header_buttons=None,
@@ -34,14 +25,25 @@ def make_choose_keyboard() -> ReplyKeyboardMarkup:
     return reply_markup
 
 
-def make_speaker_keyboard() -> InlineKeyboardMarkup:
-    buttons = [
-        [InlineKeyboardButton(speaker_choose[0],
-                              callback_data='questions')],
-        [InlineKeyboardButton(speaker_choose[1],
-                              callback_data='comments')]
-    ]
-    reply_markup = InlineKeyboardMarkup(buttons)
+def make_speaker_keyboard() -> ReplyKeyboardMarkup:
+    print('make_speaker_keyboard')
+    buttons = [KeyboardButton(button) for button in speaker_choose]
+
+    reply_markup = ReplyKeyboardMarkup(
+        build_menu(buttons, n_cols=2),
+        resize_keyboard=True
+    )
+    return reply_markup
+
+
+def make_topic_keyboard(speaker_topics) -> ReplyKeyboardMarkup:
+    print('make_topic_keyboard')
+    buttons = [KeyboardButton(button) for button in speaker_topics]
+    buttons.append(back)
+    reply_markup = ReplyKeyboardMarkup(
+        build_menu(buttons, n_cols=1),
+        resize_keyboard=True
+    )
     return reply_markup
 
 
