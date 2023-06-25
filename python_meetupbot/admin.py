@@ -35,11 +35,11 @@ class TopicsAdmin(admin.ModelAdmin):
 @admin.register(Events)
 class EventsAdmin(admin.ModelAdmin):
     list_display = [
-        'date', 'start', 'end'
+        'name', 'date', 'start', 'end'
     ]
 
     search_fields = [
-        'date'
+        'name', 'date'
     ]
 
 
