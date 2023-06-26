@@ -28,7 +28,7 @@ def handle_guest_option(update: Update, _: CallbackContext):
     option = update.message.text
 
     if option == static_text.guest_options_buttons[0]:
-        show_events_schedule(update, _)
+        show_topics_schedule(update, _)
         return GUEST_OPTIONS
 
     elif option == static_text.guest_options_buttons[1]:
@@ -80,24 +80,48 @@ def leave_feedback_event(update: Update, _):
     update.message.reply_text(static_text.feedback_event_sent)
     return ConversationHandler.END
 
+#
+# def show_events_schedule(update: Update, _):
+#     events = Events.objects.all().order_by('date')
+#
+#     if not events:
+#         update.message.reply_text(static_text.no_events)
+#         return ConversationHandler.END
+#
+#     response = static_text.events_schedule_header
+#     for event in events:
+#         response += f"{static_text.event_date}: {event.date}\n"
+#         response += f"{static_text.event_start}: {event.start}\n"
+#         response += f"{static_text.event_end}: {event.end}\n"
+#         response += "\n"
+#
+#     update.message.reply_text(response)
+#     return ConversationHandler.END
 
-def show_events_schedule(update: Update, _):
-    events = Events.objects.all().order_by('date')
 
-    if not events:
-        update.message.reply_text(static_text.no_events)
+def show_topics_schedule(update: Update, _):
+    try:
+        event = Events.objects.get(date=datetime.now().date())
+        topics = Topics.objects.filter(event=event).order_by('start')
+
+        if not topics:
+            update.message.reply_text(static_text.no_topics)
+            return ConversationHandler.END
+
+        response = static_text.events_schedule_header
+
+        for topic in topics:
+            response += f"{static_text.event_start}: {topic.start}\n"
+            response += f"{static_text.event_end}: {topic.end}\n"
+            response += f"{static_text.topic_speaker}: {topic.speaker}\n"
+            response += f"{static_text.topic_name}: {topic.title}\n"
+            response += "\n"
+        update.message.reply_text(response)
         return ConversationHandler.END
 
-    response = static_text.events_schedule_header
-    for event in events:
-        response += f"{static_text.event_date}: {event.date}\n"
-        response += f"{static_text.event_start}: {event.start}\n"
-        response += f"{static_text.event_end}: {event.end}\n"
-        response += "\n"
-
-    update.message.reply_text(response)
-    return ConversationHandler.END
-
+    except:
+        update.message.reply_text(static_text.no_event)
+        return ConversationHandler.END
 
 def get_speaker_commands(update: Update, _: CallbackContext):
     speaker = Users.objects.get(telegram_id=update.message.from_user.id)
