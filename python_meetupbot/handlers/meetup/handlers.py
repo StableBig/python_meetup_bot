@@ -29,6 +29,7 @@ def handle_guest_option(update: Update, _: CallbackContext):
 
     if option == static_text.guest_options_buttons[0]:
         show_events_schedule(update, _)
+        return GUEST_OPTIONS
 
     elif option == static_text.guest_options_buttons[1]:
         update.message.reply_text(static_text.ask_question_text)
