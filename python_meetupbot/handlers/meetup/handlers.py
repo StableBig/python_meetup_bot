@@ -1,7 +1,7 @@
 from .keyboard_utils import make_choose_keyboard, make_speaker_keyboard, make_guest_keyboard, make_topic_keyboard
 from telegram import ParseMode, Update, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, ConversationHandler, MessageHandler, Filters
-from python_meetupbot.models import Users, Speakers, Topics, Questions, Comments, Events, Eventcomments
+from python_meetupbot.models import Users, Speakers, Topics, Questions, Events
 from python_meetupbot.handlers.meetup import static_text
 from datetime import datetime
 
@@ -35,52 +35,63 @@ def handle_guest_option(update: Update, _: CallbackContext):
         update.message.reply_text(static_text.ask_question_text)
         return ASK_QUESTION
 
-    elif option == static_text.guest_options_buttons[2]:
-        update.message.reply_text(static_text.leave_feedback_talk_text)
-        return LEAVE_FEEDBACK_TALK
+    # elif option == static_text.guest_options_buttons[2]:
+    #     update.message.reply_text(static_text.leave_feedback_talk_text)
+    #     return LEAVE_FEEDBACK_TALK
 
-    elif option == static_text.guest_options_buttons[3]:
-        update.message.reply_text(static_text.leave_feedback_event_text)
-        return LEAVE_FEEDBACK_EVENT
+    # elif option == static_text.guest_options_buttons[3]:
+    #     update.message.reply_text(static_text.leave_feedback_event_text)
+    #     return LEAVE_FEEDBACK_EVENT
 
     return ConversationHandler.END
 
 
 def ask_question(update: Update, _):
     question_text = update.message.text
-    Questions.objects.create(
-        telegram_id=update.message.from_user.id,
-        date=Events.objects.get(date=datetime.now().date()),
-        speaker_id=None,
-        question=question_text
-    )
-    update.message.reply_text(static_text.question_sent)
-    return ConversationHandler.END
+    try:
+        topic = Topics.objects.get(start__lt=datetime.now(), end__gt=datetime.now())
+        Questions.objects.create(
+            telegram_id=Users.objects.get(telegram_id=update.message.from_user.id),
+            name=topic.event,
+            speaker_id=topic.speaker,
+            question=question_text
+        )
+        update.message.reply_text(static_text.question_sent)
+        return ConversationHandler.END
+    except:
+        update.message.reply_text(static_text.no_topic)
+        return ConversationHandler.END
 
 
-def leave_feedback_talk(update: Update, _):
-    feedback_text = update.message.text
-    Comments.objects.create(
-        telegram_id=update.message.from_user.id,
-        date=Events.objects.get(date=datetime.now().date()),
-        speaker_id=None,
-        comment=feedback_text
-    )
-    update.message.reply_text(static_text.feedback_talk_sent)
-    return ConversationHandler.END
+# def leave_feedback_talk(update: Update, _):
+#     feedback_text = update.message.text
+#     try:
+#         topic = Topics.objects.get(start__lt=datetime.now(), end__gt=datetime.now())
+#         Comments.objects.create(
+#             telegram_id=Users.objects.get(telegram_id=update.message.from_user.id),
+#             name=topic.event,
+#             speaker_id=topic.speaker,
+#             question=feedback_text
+#         )
+#         update.message.reply_text(static_text.feedback_talk_sent)
+#         return ConversationHandler.END
+#     except:
+#         update.message.reply_text(static_text.no_topic)
+#         return ConversationHandler.END
 
 
-def leave_feedback_event(update: Update, _):
-    feedback_text = update.message.text
-    Eventcomments.objects.create(
-        telegram_id=update.message.from_user.id,
-        date=Events.objects.get(date=datetime.now().date()),
-        meetup_comment=feedback_text
-    )
-    update.message.reply_text(static_text.feedback_event_sent)
-    return ConversationHandler.END
+# def leave_feedback_event(update: Update, _):
+#     print('leave_feedback_event')
+#     feedback_text = update.message.text
+#     Eventcomments.objects.create(
+#         telegram_id=Users.objects.get(telegram_id=update.message.from_user.id),
+#         date=Events.objects.get(date=datetime.now().date()),
+#         meetup_comment=feedback_text
+#     )
+#     update.message.reply_text(static_text.feedback_event_sent)
+#     return ConversationHandler.END
 
-#
+
 # def show_events_schedule(update: Update, _):
 #     events = Events.objects.all().order_by('date')
 #
@@ -123,12 +134,13 @@ def show_topics_schedule(update: Update, _):
         update.message.reply_text(static_text.no_event)
         return ConversationHandler.END
 
+
 def get_speaker_commands(update: Update, _: CallbackContext):
     speaker = Users.objects.get(telegram_id=update.message.from_user.id)
     try:
         Speakers.objects.get(telegram_id=speaker)
         update.message.reply_text(text=static_text.speaker_text)
-        update.message.reply_text(static_text.choose_option, reply_markup=make_speaker_keyboard())
+        update.message.reply_text(static_text.get_questions, reply_markup=make_speaker_keyboard())
         return SPEAKER_OPTIONS
 
     except Speakers.DoesNotExist:
@@ -144,12 +156,15 @@ def get_speaker_choice(update: Update, _: CallbackContext):
     speaker_topics = [topic.title for topic in topics if topic.speaker.telegram_id == speaker]
     if speaker_option == static_text.speaker_choose[0]:
         get_questions(update, _, speaker)
-    elif speaker_option == static_text.speaker_choose[1]:
-        get_topic(update, _, speaker_topics)
-    elif speaker_option in speaker_topics:
-        get_topic_comments(update, _, speaker_option)
-    elif speaker_option == static_text.back:
-        return get_speaker_commands(update, _)
+        return ConversationHandler.END
+    # elif speaker_option == static_text.speaker_choose[1]:
+    #     get_topic(update, _, speaker_topics)
+    # elif speaker_option in speaker_topics:
+    #     get_topic_comments(update, _, speaker_option)
+    # elif speaker_option == static_text.back:
+    #     return get_speaker_commands(update, _)
+    else:
+        return ConversationHandler.END
 
 
 def get_questions(update: Update, _, speaker):
@@ -173,20 +188,20 @@ def get_topic(update: Update, _: CallbackContext, speaker_topics):
     update.message.reply_text(static_text.choose_option, reply_markup=make_topic_keyboard(speaker_topics))
 
 
-def get_topic_comments(update: Update, _, topic_name):
-    comments = Comments.objects.all()
-    topic_comments = [comment for comment in comments if comment.topic.title == topic_name]
-    if not topic_comments:
-        update.message.reply_text(static_text.topic_no_comments.format(topic_name))
-        return ConversationHandler.END
-
-    response = static_text.topic_comments.format(topic_name)
-    for comment in topic_comments:
-        response += f"{comment.telegram_id}: {comment.comment}\n"
-        response += "\n"
-
-    update.message.reply_text(response)
-    return ConversationHandler.END
+# def get_topic_comments(update: Update, _, topic_name):
+#     comments = Comments.objects.all()
+#     topic_comments = [comment for comment in comments if comment.topic.title == topic_name]
+#     if not topic_comments:
+#         update.message.reply_text(static_text.topic_no_comments.format(topic_name))
+#         return ConversationHandler.END
+#
+#     response = static_text.topic_comments.format(topic_name)
+#     for comment in topic_comments:
+#         response += f"{comment.telegram_id}: {comment.comment}\n"
+#         response += "\n"
+#
+#     update.message.reply_text(response)
+#     return ConversationHandler.END
 
 
 def exit(update, _):
@@ -302,19 +317,19 @@ def organization_option(update: Update, _):
     return OPTION
 
 
-def get_feedback_event_comments(update: Update, _):
-    print('get_feedback_comments')
-    event_id = Events.objects.get(name=update.message.text).id
-    feedbacks = Eventcomments.objects.filter(name_id=event_id)
-    for feedback in feedbacks:
-        print(feedback)
-        update.message.reply_text(text=str(feedback))
+# def get_feedback_event_comments(update: Update, _):
+#     print('get_feedback_comments')
+#     event_id = Events.objects.get(name=update.message.text).id
+#     feedbacks = Eventcomments.objects.filter(name_id=event_id)
+#     for feedback in feedbacks:
+#         print(feedback)
+#         update.message.reply_text(text=str(feedback))
 
 
-def get_feedback_comments(update: Update, _):
-    print('get_feedback_questions')
-    print(update.message.text)
-    feedbacks = Comments.objects.filter(topic_id=update.message.text)
-    for feedback in feedbacks:
-        print(feedback)
-        update.message.reply_text(text=str(feedback))
+# def get_feedback_comments(update: Update, _):
+#     print('get_feedback_questions')
+#     print(update.message.text)
+#     feedbacks = Comments.objects.filter(topic_id=update.message.text)
+#     for feedback in feedbacks:
+#         print(feedback)
+#         update.message.reply_text(text=str(feedback))
