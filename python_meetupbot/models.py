@@ -114,21 +114,21 @@ class Topics(UUIDMixin, TimeStampedMixin):
         return f'{self.title} - {self.speaker.fio}'
 
 
-class Comments(UUIDMixin, TimeStampedMixin):
-    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='td_id', null=True, blank=True,
-                                    default=False)
-    date = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='date_event', default=False)
-    speaker = models.ForeignKey(Speakers, on_delete=models.DO_NOTHING, related_name='speaker', null=True)
-    topic = models.ForeignKey(Topics, on_delete=models.DO_NOTHING, related_name='topic', null=True)
-    comment = models.CharField(max_length=200, verbose_name='Comment to the speaker', null=True,
-                               blank=True)
-
-    class Meta:
-        verbose_name = 'Comment'
-        verbose_name_plural = 'Comments'
-
-    def __str__(self):
-        return f'{self.telegram_id} - {self.comment}'
+# class Comments(UUIDMixin, TimeStampedMixin):
+#     telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='td_id', null=True, blank=True,
+#                                     default=False)
+#     date = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='date_event', default=False)
+#     speaker = models.ForeignKey(Speakers, on_delete=models.DO_NOTHING, related_name='speaker', null=True)
+#     topic = models.ForeignKey(Topics, on_delete=models.DO_NOTHING, related_name='topic', null=True)
+#     comment = models.CharField(max_length=200, verbose_name='Comment to the speaker', null=True,
+#                                blank=True)
+#
+#     class Meta:
+#         verbose_name = 'Comment'
+#         verbose_name_plural = 'Comments'
+#
+#     def __str__(self):
+#         return f'{self.telegram_id} - {self.comment}'
 
 
 class Questions(UUIDMixin, TimeStampedMixin):
@@ -146,15 +146,15 @@ class Questions(UUIDMixin, TimeStampedMixin):
         return f'{self.telegram_id} - {self.question}'
 
 
-class Eventcomments(UUIDMixin, TimeStampedMixin):
-    telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='Event_comments_td_id', null=True,
-                                    blank=True, default=False)
-    name = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='Event_name', default=False)
-    meetup_comment = models.CharField(max_length=200, verbose_name='Comment about meetup', null=True, blank=True)
-
-    class Meta:
-        verbose_name = 'Meetup Comment'
-        verbose_name_plural = 'Meetup Comments'
-
-    def __str__(self):
-        return f'{self.telegram_id} - {self.meetup_comment}'
+# class Eventcomments(UUIDMixin, TimeStampedMixin):
+#     telegram_id = models.ForeignKey(Users, on_delete=models.DO_NOTHING, related_name='Event_comments_td_id', null=True,
+#                                     blank=True, default=False)
+#     name = models.ForeignKey(Events, on_delete=models.DO_NOTHING, related_name='Event_name', default=False)
+#     meetup_comment = models.CharField(max_length=200, verbose_name='Comment about meetup', null=True, blank=True)
+#
+#     class Meta:
+#         verbose_name = 'Meetup Comment'
+#         verbose_name_plural = 'Meetup Comments'
+#
+#     def __str__(self):
+#         return f'{self.telegram_id} - {self.meetup_comment}'

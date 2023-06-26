@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Users, Comments, Topics, Events, Speakers, Eventcomments, Questions
+from .models import Users, Topics, Events, Speakers, Questions
 
 
 @admin.register(Users)
@@ -12,13 +12,13 @@ class UsersAdmin(admin.ModelAdmin):
     search_fields = ['telegram_id', 'username', 'last_name']
 
 
-@admin.register(Comments)
-class CommentsAdmin(admin.ModelAdmin):
-    list_display = [
-        'date', 'telegram_id', 'speaker_id', 'comment'
-    ]
-
-    search_fields = ['date', 'telegram_id', 'speaker_id']
+# @admin.register(Comments)
+# class CommentsAdmin(admin.ModelAdmin):
+#     list_display = [
+#         'date', 'telegram_id', 'speaker_id', 'comment'
+#     ]
+#
+#     search_fields = ['date', 'telegram_id', 'speaker_id']
 
 
 @admin.register(Topics)
@@ -54,11 +54,11 @@ class SpeakersAdmin(admin.ModelAdmin):
     ]
 
 
-@admin.register(Eventcomments)
-class EventcommentsAdmin(admin.ModelAdmin):
-    list_display = ['telegram_id', 'meetup_comment']
-
-    search_fields = ['name', 'date', 'meetup_comment']
+# @admin.register(Eventcomments)
+# class EventcommentsAdmin(admin.ModelAdmin):
+#     list_display = ['telegram_id', 'meetup_comment']
+#
+#     search_fields = ['name', 'date', 'meetup_comment']
 
 
 @admin.register(Questions)

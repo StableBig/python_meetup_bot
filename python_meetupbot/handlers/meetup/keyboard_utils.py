@@ -50,9 +50,8 @@ def make_topic_keyboard(speaker_topics) -> ReplyKeyboardMarkup:
 def make_guest_keyboard() -> ReplyKeyboardMarkup:
     print('make_guest_keyboard')
     buttons = [KeyboardButton(button) for button in guest_options_buttons]
-    buttons.append(back)
     reply_markup = ReplyKeyboardMarkup(
-        build_menu(buttons, n_cols=1),
+        build_menu(buttons, n_cols=2),
         resize_keyboard=True
     )
     return reply_markup

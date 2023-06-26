@@ -7,8 +7,7 @@ from telegram.ext import (CommandHandler, ConversationHandler, Dispatcher,
                           Filters, MessageHandler, Updater,
                           CallbackQueryHandler, ShippingQueryHandler)
 from python_meetup.settings import DEBUG, TELEGRAM_TOKEN
-from python_meetupbot.handlers.meetup.handlers import (guest_options, handle_guest_option, ask_question,
-                                                       leave_feedback_talk, leave_feedback_event, exit,
+from python_meetupbot.handlers.meetup.handlers import (guest_options, handle_guest_option, ask_question, exit,
                                                        GUEST_OPTIONS, ASK_QUESTION, LEAVE_FEEDBACK_TALK,
                                                        LEAVE_FEEDBACK_EVENT)
 from python_meetupbot.handlers.common import handlers as common_handlers
@@ -43,19 +42,19 @@ meetup_handlers = ConversationHandler(
         meetup_handlers.MEETUP_END_TIME: [
             MessageHandler(Filters.text & ~Filters.command, meetup_handlers.meetup_end_time)
         ],
-        meetup_handlers.FEEDBACK_EVENT_COMMENTS: [
-            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.get_feedback_event_comments)
-        ],
-        meetup_handlers.FEEDBACK_COMMENTS: [
-            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.get_feedback_comments)
-        ],
+        # meetup_handlers.FEEDBACK_EVENT_COMMENTS: [
+        #     MessageHandler(Filters.text & ~Filters.command, meetup_handlers.get_feedback_event_comments)
+        # ],
+        # meetup_handlers.FEEDBACK_COMMENTS: [
+        #     MessageHandler(Filters.text & ~Filters.command, meetup_handlers.get_feedback_comments)
+        # ],
         meetup_handlers.GUEST_OPTIONS: [
             MessageHandler(Filters.text & ~Filters.command, meetup_handlers.handle_guest_option)],
         meetup_handlers.ASK_QUESTION: [MessageHandler(Filters.text & ~Filters.command, meetup_handlers.ask_question)],
-        meetup_handlers.LEAVE_FEEDBACK_TALK: [
-            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.leave_feedback_talk)],
-        meetup_handlers.LEAVE_FEEDBACK_EVENT: [
-            MessageHandler(Filters.text & ~Filters.command, meetup_handlers.leave_feedback_event)],
+        # meetup_handlers.LEAVE_FEEDBACK_TALK: [
+        #     MessageHandler(Filters.text & ~Filters.command, meetup_handlers.leave_feedback_talk)],
+        # meetup_handlers.LEAVE_FEEDBACK_EVENT: [
+        #     MessageHandler(Filters.text & ~Filters.command, meetup_handlers.leave_feedback_event)],
         meetup_handlers.SPEAKER_OPTIONS: [
             MessageHandler(Filters.text & ~Filters.command, meetup_handlers.get_speaker_choice)]
     },
