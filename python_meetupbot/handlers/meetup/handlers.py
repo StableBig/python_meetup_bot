@@ -108,7 +108,7 @@ def show_topics_schedule(update: Update, _):
             update.message.reply_text(static_text.no_topics)
             return ConversationHandler.END
 
-        response = static_text.events_schedule_header
+        response = static_text.topics_schedule_header
 
         for topic in topics:
             response += f"{static_text.event_start}: {topic.start}\n"
