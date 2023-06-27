@@ -1,4 +1,5 @@
-from .keyboard_utils import make_choose_keyboard, make_speaker_keyboard, make_guest_keyboard, make_topic_keyboard
+from .keyboard_utils import make_choose_keyboard, make_speaker_keyboard, make_guest_keyboard, make_topic_keyboard, \
+    make_keyboard_with_admin_features
 from telegram import ParseMode, Update, ReplyKeyboardRemove
 from telegram.ext import CallbackContext, ConversationHandler, MessageHandler, Filters
 from python_meetupbot.models import Users, Speakers, Topics, Questions, Events
@@ -271,7 +272,9 @@ def choose_admin_button(update: Update, _):
         )
         return CREATE_MEETUP
     elif static_text.features_choose.index(answer) == 1:
-        pass
+        text = static_text.admin_features
+        update.message.reply_text(text=text,
+                                  reply_markup=make_keyboard_with_admin_features())
     elif static_text.features_choose.index(answer) == 2:
         list_event = Events.objects.all().order_by('date')
         text = static_text.choose_meetup
